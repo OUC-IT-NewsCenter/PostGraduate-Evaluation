@@ -83,13 +83,6 @@
             margin: 0;
         }
 
-        /* 语言切换按钮 */
-        .language-switch {
-            display: flex;
-            align-items: center;
-            margin-left: 15px;
-        }
-
         .language-switch select {
             background-color: transparent;
             color: white;
@@ -328,10 +321,6 @@
                 gap: 10px;
             }
 
-            .language-switch {
-                margin-left: 0;
-                margin-top: 10px;
-            }
         }
 
         @media (max-width: 480px) {
@@ -340,12 +329,6 @@
             }
         }
 
-        .icon {
-            color: transparent;
-            background-color: #ec2930;
-            background-clip: text;
-            -webkit-background-clip: text;
-        }
     </style>
 </head>
 <body>
@@ -364,12 +347,6 @@
     <div class="logo-text">
         <img src="https://www.ouc.edu.cn/_upload/tpl/0c/00/3072/template3072/images/logo.svg" alt="中国海洋大学校徽">
         <h1>研究生培养系统平台</h1>
-    </div>
-    <div class="language-switch">
-        <select id="language-select">
-            <option value="zh">中文</option>
-            <option value="en">English</option>
-        </select>
     </div>
 </div>
 
@@ -494,16 +471,6 @@
         const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
         passwordInput.setAttribute('type', type);
         this.textContent = type === 'password' ? '👁' : '👁';
-    });
-
-    // 语言切换功能
-    document.getElementById('language-select').addEventListener('change', function() {
-        const language = this.value;
-        if (language === 'en') {
-            alert('切换到英文版本功能后端接入');
-        } else {
-            alert('切换到中文版本功能后端接入');
-        }
     });
 </script>
 </body>
