@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中国海洋大学研究生管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* 背景图样式 */
+        .background-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        /* 添加浅色遮罩层 */
+        .background-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.3);
+            z-index: 1;
+        }
+
+        .background-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            z-index: 0;
+        }
+
+        .background-image.active {
+            opacity: 1;
+        }
+
+        /* 顶部蓝色栏 */
+        .top-bar {
+            background-color: #1e63b0;
+            color: white;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 10;
+        }
+
+        .top-bar .logo-text {
+            display: flex;
+            align-items: center;
+        }
+
+        .top-bar .logo-text img {
+            height: 40px;
+            margin-right: 10px;
+        }
+
+        .top-bar .logo-text h1 {
+            font-size: 22px;
+            margin: 0;
+        }
+
+        /* 语言切换按钮 */
+        .language-switch {
+            display: flex;
+            align-items: center;
+            margin-left: 15px;
+        }
+
+        .language-switch select {
+            background-color: transparent;
+            color: white;
+            border: 1px solid white;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .language-switch option {
+            background-color: #1e63b0;
+            color: white;
+        }
+
+        /* 主内容区域 */
+        .main-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: calc(100vh - 64px);
+            padding: 30px 20px;
+            position: relative;
+            z-index: 5;
+        }
+
+        /* 登录区域 */
+        .login-container {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .login-section {
+            width: 400px;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        .login-section::before {
+            content: "";
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            background: linear-gradient(135deg, rgba(30,99,176,0.1), rgba(30,99,176,0.05));
+            border-radius: 12px;
+            z-index: -1;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-header h2 {
+            font-size: 24px;
+            color: #1e63b0;
+            margin-bottom: 10px;
+        }
+
+        .login-header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: all 0.3s;
+            background-color: white;
+        }
+
+        /* 密码输入框组 */
+        .password-group {
+            position: relative;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #666;
+            font-size: 16px;
+        }
+
+        .form-group input:focus {
+            border-color: #1e63b0;
+            box-shadow: 0 0 0 2px rgba(30,99,176,0.2);
+            outline: none;
+        }
+
+        .captcha-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .captcha-group input {
+            flex: 1;
+        }
+
+        .captcha-img {
+            width: 120px;
+            height: 44px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: #f5f5f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 12px;
+        }
+
+        .login-btn {
+            background-color: #1e63b0;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+
+        .login-btn:hover {
+            background-color: #154b8a;
+        }
+
+        .login-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+        }
+
+        .forgot-password {
+            color: #1e63b0;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s;
+        }
+
+        .forgot-password:hover {
+            color: #154b8a;
+            text-decoration: underline;
+        }
+
+        /* 底部导航栏 */
+        .bottom-nav {
+            background-color: rgba(51, 51, 51, 0.9);
+            color: white;
+            padding: 20px 0;
+            position: relative;
+            z-index: 10;
+        }
+
+        .nav-links {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px 30px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .nav-links a:hover {
+            background-color: rgba(255,255,255,0.1);
+            text-decoration: underline;
+        }
+
+        /* 底部版权信息 */
+        .footer {
+            background-color: rgba(34, 34, 34, 0.9);
+            color: #aaa;
+            text-align: center;
+            padding: 15px 0;
+            font-size: 12px;
+            position: relative;
+            z-index: 10;
+        }
+
+        @media (max-width: 768px) {
+            .login-container {
+                justify-content: center;
+            }
+
+            .login-section {
+                width: 100%;
+                max-width: 400px;
+            }
+
+            .top-bar {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .language-switch {
+                margin-left: 0;
+                margin-top: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-links {
+                gap: 10px;
+            }
+        }
+
+        .icon {
+            color: transparent;
+            background-color: #ec2930;
+            background-clip: text;
+            -webkit-background-clip: text;
+        }
+    </style>
+</head>
+<body>
+<!-- 背景图容器 -->
+<div class="background-container" id="backgroundContainer">
+    <!-- 浅色遮罩层 -->
+    <div class="background-overlay"></div>
+    <img src="https://id.ouc.edu.cn/sso/casLogin/img/banner16-1694742541774.jpg" class="background-image" alt="背景图1">
+    <img src="https://id.ouc.edu.cn/sso/casLogin/img/banner1-1694742541774.jpg" class="background-image" alt="背景图2">
+    <img src="https://id.ouc.edu.cn/sso/casLogin/img/banner4-1694742541774.jpg" class="password-image" alt="背景图3">
+    <img src="https://id.ouc.edu.cn/sso/casLogin/img/banner3-1694742541774.jpg" class="background-image" alt="背景图4">
+</div>
+
+<!-- 顶部栏 -->
+<div class="top-bar">
+    <div class="logo-text">
+        <img src="https://www.ouc.edu.cn/_upload/tpl/0c/00/3072/template3072/images/logo.svg" alt="中国海洋大学校徽">
+        <h1>研究生培养系统平台</h1>
+    </div>
+    <div class="language-switch">
+        <select id="language-select">
+            <option value="zh">中文</option>
+            <option value="en">English</option>
+        </select>
+    </div>
+</div>
+
+<div class="main-container">
+    <!-- 登录容器 -->
+    <div class="login-container">
+        <div class="login-section">
+            <div class="login-header">
+                <h2>欢迎登录研究生培养系统</h2>
+                <p>请使用您的账号密码登录系统</p>
+            </div>
+            <form class="login-form">
+                <div class="form-group">
+                    <label for="username">账号</label>
+                    <input type="text" id="username" placeholder="请输入您的账号" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">密码</label>
+                    <div class="password-group">
+                        <input type="password" id="password" placeholder="请输入您的密码" required>
+                        <button type="button" class="toggle-password" id="togglePassword">👁</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="captcha">验证码</label>
+                    <div class="captcha-group">
+                        <input type="text" id="captcha" placeholder="请输入验证码" required>
+                        <div class="captcha-img">点击刷新</div>
+                    </div>
+                </div>
+
+                <button type="submit" class="login-btn">立即登录</button>
+
+                <div class="login-footer">
+                    <a href="#" class="forgot-password">忘记密码?</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 底部导航栏 -->
+<div class="bottom-nav">
+    <div class="nav-links">
+        <a href="#">学校官网</a>
+        <a href="#">信息门户</a>
+        <a href="#">学校VPN</a>
+        <a href="#">领导信箱</a>
+        <a href="#">信息服务</a>
+        <a href="#">国际交流</a>
+        <a href="#">邮件系统</a>
+        <a href="#">学院信息</a>
+    </div>
+</div>
+
+<!-- 底部版权信息 -->
+<div class="footer">
+    <p>版权所有©中国海洋大学 鲁ICP备05002467号-1 鲁公网安备 37021202000030号</p>
+</div>
+
+<script>
+    // 背景图轮换
+    const backgroundImages = document.querySelectorAll('.background-image');
+    let currentImage = 0;
+
+    // 显示第一张背景图
+    backgroundImages[currentImage].classList.add('active');
+
+    // 每8秒切换一次背景图
+    setInterval(() => {
+        backgroundImages[currentImage].classList.remove('active');
+        currentImage = (currentImage + 1) % backgroundImages.length;
+        backgroundImages[currentImage].classList.add('active');
+    }, 8000);
+
+    // 验证码刷新
+    document.querySelector('.captcha-img').addEventListener('click', function() {
+        // 获取新验证码后端接入
+        this.textContent = "加载中...";
+        setTimeout(() => {
+            this.textContent = Math.random().toString(36).substr(2, 5).toUpperCase();
+        }, 300);
+    });
+
+    // 初始化验证码
+    document.querySelector('.captcha-img').textContent =
+        Math.random().toString(36).substr(2, 5).toUpperCase();
+
+    // 回顶部功能
+    const backToTopButton = document.getElementById('backToTop');
+
+    window.addEventListener('scroll', function() {
+        if (window.pageYOffset > 300) {
+            backToTopButton.style.opacity = '0.8';
+            backToTopButton.style.visibility = 'visible';
+        } else {
+            backToTopButton.style.opacity = '0';
+            backToTopButton.style.visibility = 'hidden';
+        }
+    });
+
+    backToTopButton.addEventListener('click', function() {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
+
+    // 表单提交
+    document.querySelector('.login-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        alert('登录功能后端接入');
+    });
+
+    // 密码显示/隐藏切换
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+
+    togglePassword.addEventListener('click', function() {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        this.textContent = type === 'password' ? '👁' : '👁';
+    });
+
+    // 语言切换功能
+    document.getElementById('language-select').addEventListener('change', function() {
+        const language = this.value;
+        if (language === 'en') {
+            alert('切换到英文版本功能后端接入');
+        } else {
+            alert('切换到中文版本功能后端接入');
+        }
+    });
+</script>
+</body>
+</html>
