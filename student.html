@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生信息管理 | 研究生管理系统</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --dark-color: #2c3e50;
+            --light-color: #ecf0f1;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Roboto', sans-serif; background-color: #f5f7fa; color: #333; }
+        .container { display: grid; grid-template-columns: 250px 1fr; grid-template-rows: 60px 1fr; height: 100vh; }
+        header { grid-column: 1 / 3; background-color: var(--dark-color); color: white; display: flex; align-items: center; padding: 0 20px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); z-index: 100; }
+        .logo { font-size: 20px; font-weight: 700; display: flex; align-items: center; }
+        .logo-icon { margin-right: 10px; font-size: 24px; }
+        .user-info { margin-left: auto; display: flex; align-items: center; }
+        .user-avatar { width: 36px; height: 36px; border-radius: 50%; background-color: var(--primary-color); display: flex; align-items: center; justify-content: center; margin-left: 15px; font-weight: 500; }
+        .sidebar { background-color: white; border-right: 1px solid #e0e0e0; padding: 20px 0; }
+        .menu { list-style: none; }
+        .menu-item { padding: 12px 20px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; }
+        .menu-item:hover { background-color: #f5f7fa; }
+        .menu-item.active { background-color: var(--light-color); border-left: 3px solid var(--primary-color); font-weight: 500; }
+        .menu-icon { margin-right: 10px; font-size: 18px; }
+        .main-content { padding: 20px; overflow-y: auto; }
+        .page-title { font-size: 24px; margin-bottom: 20px; color: var(--dark-color); display: flex; justify-content: space-between; align-items: center; }
+        .student-header { display: flex; align-items: center; margin-bottom: 20px; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); }
+        .student-avatar { width: 80px; height: 80px; border-radius: 50%; background-color: var(--light-color); display: flex; align-items: center; justify-content: center; font-size: 32px; color: var(--primary-color); margin-right: 20px; }
+        .student-details { flex: 1; }
+        .student-name { font-size: 24px; font-weight: 500; margin-bottom: 5px; }
+        .student-id { color: #7f8c8d; font-size: 16px; }
+        .student-meta { margin-top: 10px; font-size: 14px; color: #7f8c8d; }
+        .module-section { background-color: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); padding: 20px; margin-bottom: 20px; }
+        .section-title { font-size: 18px; margin-bottom: 20px; color: var(--dark-color); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .section-title-icon { margin-right: 10px; color: var(--primary-color); }
+        .section-actions { display: flex; gap: 10px; }
+        .table-container { margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background-color: var(--light-color); font-weight: 500; }
+        tr:hover { background-color: #f5f7fa; }
+        .no-data-row td { text-align: center; color: #999; padding: 20px; }
+        .actions-cell { width: 120px; text-align: right; }
+        .actions-cell .btn { margin-left: 5px; }
+        .btn { padding: 8px 15px; border-radius: 4px; border: none; font-weight: 500; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; justify-content: center; }
+        .btn-primary { background-color: var(--primary-color); color: white; }
+        .btn-primary:hover { background-color: #2980b9; }
+        .btn-secondary { background-color: #95a5a6; color: white; }
+        .btn-secondary:hover { background-color: #7f8c8d; }
+        .btn-danger { background-color: var(--danger-color); color: white; }
+        .btn-danger:hover { background-color: #c0392b; }
+        .btn-sm { padding: 5px 10px; font-size: 13px; }
+        .btn-icon { margin-right: 5px; }
+        .form-group { margin-bottom: 15px; }
+        .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        label { display: block; margin-bottom: 5px; font-weight: 500; }
+        input, select, textarea { width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 4px; font-family: inherit; }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); }
+        .modal-content { background-color: white; margin: 5% auto; padding: 20px; border-radius: 8px; width: 90%; max-width: 700px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); animation: slide-down 0.3s ease-out; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e9ecef; padding-bottom: 10px; margin-bottom: 20px; }
+        .modal-title { font-size: 20px; color: var(--dark-color); }
+        .close-button { background: none; border: none; font-size: 24px; cursor: pointer; color: #aaa; }
+        .close-button:hover { color: #333; }
+        .modal-footer { text-align: right; margin-top: 20px; border-top: 1px solid #e9ecef; padding-top: 15px; }
+        @keyframes slide-down { from { transform: translateY(-30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body onload="initializePage()">
+<div class="container">
+    <!-- Navigation and Sidebar -->
+    <header>
+        <div class="logo"><span class="logo-icon"><i class="fas fa-graduation-cap"></i></span><span>研究生管理系统</span></div>
+        <div class="user-info"><span>管理员</span><div class="user-avatar">管</div></div>
+    </header>
+    <aside class="sidebar">
+        <ul class="menu">
+            <li class="menu-item"><span class="menu-icon"><i class="fas fa-tachometer-alt"></i></span><span>数据展板</span></li>
+            <li class="menu-item"><span class="menu-icon"><i class="fas fa-chalkboard-teacher"></i></span><span>导师信息</span></li>
+            <li class="menu-item active"><span class="menu-icon"><i class="fas fa-user-graduate"></i></span><span>学生信息</span></li>
+            <li class="menu-item"><span class="menu-icon"><i class="fas fa-star"></i></span><span>评价系统</span></li>
+            <li class="menu-item"><span class="menu-icon"><i class="fas fa-cog"></i></span><span>系统设置</span></li>
+        </ul>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <div class="page-title"><h1>学生信息管理</h1></div>
+
+        <!-- Student Header -->
+        <div class="student-header">
+            <div class="student-avatar" id="student-avatar">李四</div>
+            <div class="student-details">
+                <h2 class="student-name" id="student-name">李四</h2>
+                <div class="student-id" id="student-id">学号: 202101001</div>
+                <div class="student-meta">
+                    <span id="student-college">信息科学与技术学院</span><span style="margin: 0 10px;">|</span><span id="student-major">人工智能</span>
+                </div>
+            </div>
+            <div class="form-group" style="width: 200px; margin-bottom: 0;">
+                <label for="student-type-selector">查看学生类型</label>
+                <select id="student-type-selector" onchange="updateStudentView()">
+                    <option value="academic-phd">学术型博士</option><option value="professional-phd">专业型博士</option>
+                    <option value="academic-master">学术型硕士</option><option value="professional-master">专业型硕士</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Basic Info Section -->
+        <section class="module-section">
+            <h2 class="section-title">
+                <div><i class="fas fa-info-circle section-title-icon"></i><span>基本信息</span></div>
+                <div class="section-actions"><button class="btn btn-sm btn-secondary" onclick="showModal('editBasicInfo')"><i class="fas fa-edit btn-icon"></i>编辑信息</button></div>
+            </h2>
+            <table><tbody>
+            <tr><th>学号</th><td id="info-id">202101001</td><th>姓名</th><td id="info-name">李四</td></tr>
+            <tr><th>年级</th><td id="info-grade">2021级</td><th>学院</th><td id="info-college">信息科学与技术学院</td></tr>
+            <tr><th>专业</th><td id="info-major">人工智能</td><th>导师</th><td id="info-supervisor">张三</td></tr>
+            <tr><th>录取类型</th><td id="info-enroll-type">普通招考</td><th>培养类型</th><td id="info-training-type">学术型</td></tr>
+            <tr><th>学位类型</th><td id="info-degree-type">博士</td><th>当前状态</th><td id="info-status">在读</td></tr>
+            </tbody></table>
+        </section>
+
+        <!-- Course & Practice Section -->
+        <section class="module-section">
+            <h2 class="section-title">
+                <div><i class="fas fa-book-reader section-title-icon"></i><span>课程与实践</span></div>
+                <div class="section-actions"><button class="btn btn-sm btn-secondary" onclick="showModal('editCourseInfo')"><i class="fas fa-edit btn-icon"></i>编辑均绩</button></div>
+            </h2>
+            <div class="table-container">
+                <p>平均学分绩: <strong id="info-gpa">92.5</strong></p>
+            </div>
+            <div class="table-container">
+                <h3 style="margin: 20px 0 10px;">实践模块</h3>
+                <table id="practiceTable"><thead><tr><th>项目</th><th>完成情况</th><th class="actions-cell">操作</th></tr></thead><tbody></tbody></table>
+                <div style="text-align: right; margin-top: 10px;"><button class="btn btn-sm btn-primary" onclick="showModal('addPractice')"><i class="fas fa-plus btn-icon"></i>添加实践条目</button></div>
+            </div>
+        </section>
+
+        <!-- Training Section -->
+        <section class="module-section">
+            <h2 class="section-title">
+                <div><i class="fas fa-tasks section-title-icon"></i><span>培养环节</span></div>
+            </h2>
+            <table id="trainingTable"><thead><tr><th>环节名称</th><th>状态</th><th>完成日期</th><th class="actions-cell">操作</th></tr></thead><tbody>
+            <tr id="training-comprehensive-exam" class="phd-only fixed-row" data-name="学科综合考试 (博士)"><td>学科综合考试 (博士)</td><td><span class="badge badge-success">通过</span></td><td>2022-09-15</td><td class="actions-cell"><button class="btn btn-sm btn-secondary" onclick="editRow(this, 'TrainingStep')"><i class="fas fa-edit"></i></button></td></tr>
+            <tr id="training-proposal-phd" class="phd-only fixed-row" data-name="开题报告 (博士)"><td>开题报告 (博士)</td><td><span class="badge badge-success">通过</span></td><td>2023-03-10</td><td class="actions-cell"><button class="btn btn-sm btn-secondary" onclick="editRow(this, 'TrainingStep')"><i class="fas fa-edit"></i></button></td></tr>
+            <tr id="training-proposal-master" class="master-only fixed-row" data-name="开题审核 (硕士)"><td>开题审核 (硕士)</td><td><span class="badge badge-success">通过</span></td><td>2022-03-10</td><td class="actions-cell"><button class="btn btn-sm btn-secondary" onclick="editRow(this, 'TrainingStep')"><i class="fas fa-edit"></i></button></td></tr>
+            <tr id="training-progress-report" class="fixed-row" data-name="论文研究进展报告"><td>论文研究进展报告</td><td><span class="badge badge-success">通过</span></td><td>2023-10-20</td><td class="actions-cell"><button class="btn btn-sm btn-secondary" onclick="editRow(this, 'TrainingStep')"><i class="fas fa-edit"></i></button></td></tr>
+            <tr id="training-pre-defense" class="phd-only fixed-row" data-name="学位论文预答辩 (博士)"><td>学位论文预答辩 (博士)</td><td><span class="badge badge-warning">待进行</span></td><td>-</td><td class="actions-cell"><button class="btn btn-sm btn-secondary" onclick="editRow(this, 'TrainingStep')"><i class="fas fa-edit"></i></button></td></tr>
+            <tr id="training-internal-review" class="fixed-row" data-name="学位论文院内审核"><td>学位论文院内审核</td><td><span class="badge badge-warning">待进行</span></td><td>-</td><td class="actions-cell"><button class="btn btn-sm btn-secondary" onclick="editRow(this, 'TrainingStep')"><i class="fas fa-edit"></i></button></td></tr>
+            <tr id="training-external-review" class="fixed-row" data-name="学位论文外审评阅"><td>学位论文外审评阅</td><td><span class="badge badge-warning">待进行</span></td><td>-</td><td class="actions-cell"><button class="btn btn-sm btn-secondary" onclick="editRow(this, 'TrainingStep')"><i class="fas fa-edit"></i></button></td></tr>
+            <tr id="training-defense" class="fixed-row" data-name="学位论文答辩"><td>学位论文答辩</td><td><span class="badge badge-warning">待进行</span></td><td>-</td><td class="actions-cell"><button class="btn btn-sm btn-secondary" onclick="editRow(this, 'TrainingStep')"><i class="fas fa-edit"></i></button></td></tr>
+            </tbody></table>
+            <div style="text-align: right; margin-top: 10px;"><button class="btn btn-sm btn-primary" onclick="showModal('addTrainingStep')"><i class="fas fa-plus btn-icon"></i>添加培养环节</button></div>
+        </section>
+
+        <!-- Achievements and Awards Section -->
+        <section class="module-section">
+            <h2 class="section-title"><div><i class="fas fa-trophy section-title-icon"></i><span>成果与奖励</span></div></h2>
+            <div class="table-container">
+                <h3 style="margin-bottom: 10px;">所获成果 (论文、专利等)</h3>
+                <table id="achievementsTable"><thead><tr><th>类型</th><th>成果名称</th><th>发表/授权日期</th><th>备注</th><th class="actions-cell">操作</th></tr></thead><tbody></tbody></table>
+                <div style="text-align: right; margin-top: 10px;"><button class="btn btn-sm btn-primary" onclick="showModal('addAchievement')"><i class="fas fa-plus btn-icon"></i>添加成果</button></div>
+            </div>
+            <div class="table-container">
+                <h3 style="margin: 20px 0 10px;">科技活动及竞赛</h3>
+                <table id="competitionsTable"><thead><tr><th>竞赛名称</th><th>级别</th><th>获奖等级</th><th>获奖年份</th><th class="actions-cell">操作</th></tr></thead><tbody></tbody></table>
+                <div style="text-align: right; margin-top: 10px;"><button class="btn btn-sm btn-primary" onclick="showModal('addCompetition')"><i class="fas fa-plus btn-icon"></i>添加竞赛获奖</button></div>
+            </div>
+        </section>
+
+        <!-- Disciplinary Records Section -->
+        <section class="module-section">
+            <h2 class="section-title"><div><i class="fas fa-exclamation-triangle section-title-icon"></i><span>处分记录</span></div></h2>
+            <table id="disciplineTable"><thead><tr><th>处分类型</th><th>事由</th><th>日期</th><th class="actions-cell">操作</th></tr></thead><tbody></tbody></table>
+            <div style="text-align: right; margin-top: 10px;"><button class="btn btn-sm btn-primary" onclick="showModal('addDiscipline')"><i class="fas fa-plus btn-icon"></i>补充处分</button></div>
+        </section>
+    </main>
+</div>
+
+<!-- Generic Modal -->
+<div id="genericModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modalTitle" class="modal-title">Modal Title</h3>
+            <button class="close-button" onclick="closeModal()">×</button>
+        </div>
+        <div id="modalBody"><!-- Form content injected by JS --></div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+            <button class="btn btn-primary" onclick="saveData()">保存</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- GLOBAL STATE ---
+    let currentAction = '';
+    let currentEditTarget = null;
+
+    // --- INITIALIZATION ---
+    function initializePage() {
+        loadSampleData();
+        updateStudentView();
+        document.querySelectorAll('table[id]').forEach(table => {
+            updateNoDataRow(table);
+        });
+    }
+
+    function loadSampleData() {
+        addTableRow('practiceTable', { name: '学术活动', notes: '参加国际学术会议2次，校内讲座5次' }, 'Practice');
+        addTableRow('practiceTable', { name: '实践训练', notes: '完成企业实习项目1项' }, 'Practice');
+        addTableRow('achievementsTable', { type: '学术论文', name: 'A Novel Approach...', date: '2023-05-20', notes: 'SCI一区' }, 'Achievement');
+        addTableRow('competitionsTable', { name: '“挑战杯”竞赛', level: '国家级', award: '一等奖', year: '2023' }, 'Competition');
+    }
+
+    // --- VIEW LOGIC ---
+    function updateStudentView() {
+        const type = document.getElementById('student-type-selector').value;
+        document.getElementById('info-degree-type').textContent = type.includes('phd') ? '博士' : '硕士';
+        document.getElementById('info-training-type').textContent = type.includes('professional') ? '专业型' : '学术型';
+
+        document.querySelectorAll('#trainingTable .phd-only').forEach(row => row.style.display = type.includes('phd') ? '' : 'none');
+        document.querySelectorAll('#trainingTable .master-only').forEach(row => row.style.display = type.includes('master') ? '' : 'none');
+    }
+
+    // --- GENERAL CRUD & TABLE LOGIC ---
+    function deleteRow(buttonElement) {
+        if (buttonElement.closest('tr').classList.contains('fixed-row')) {
+            return alert('默认培养环节无法删除。');
+        }
+        if (confirm('您确定要删除此条记录吗？')) {
+            const row = buttonElement.closest('tr');
+            const table = row.closest('table');
+            row.remove();
+            updateNoDataRow(table);
+        }
+    }
+
+    function editRow(buttonElement, actionPrefix) {
+        const row = buttonElement.closest('tr');
+        showModal(`edit${actionPrefix}`, row.dataset, row);
+    }
+
+    function addTableRow(tableId, data, actionPrefix) {
+        const table = document.getElementById(tableId).querySelector('tbody');
+        const newRow = table.insertRow();
+        Object.keys(data).forEach(key => newRow.dataset[key] = data[key]);
+
+        let cellsHtml = '';
+        const isFixed = data.fixed === 'true';
+
+        // Generate table cells based on tableId
+        if (tableId === 'practiceTable') { cellsHtml = `<td>${data.name}</td><td>${data.notes}</td>`; }
+        else if (tableId === 'trainingTable') { cellsHtml = `<td>${data.name}</td><td><span class="badge ${getBadgeClass(data.status)}">${data.status}</span></td><td>${data.date || '-'}</td>`; }
+        else if (tableId === 'achievementsTable') { cellsHtml = `<td>${data.type}</td><td>${data.name}</td><td>${data.date}</td><td>${data.notes}</td>`; }
+        else if (tableId === 'competitionsTable') { cellsHtml = `<td>${data.name}</td><td>${data.level}</td><td>${data.award}</td><td>${data.year}</td>`; }
+        else if (tableId === 'disciplineTable') { cellsHtml = `<td>${data.type}</td><td>${data.reason}</td><td>${data.date}</td>`; }
+
+        // Generate action buttons
+        const actionsHtml = `<td class="actions-cell">
+        <button class="btn btn-sm btn-secondary" onclick="editRow(this, '${actionPrefix}')"><i class="fas fa-edit"></i></button>
+        ${isFixed ? '' : `<button class="btn btn-sm btn-danger" onclick="deleteRow(this)"><i class="fas fa-trash"></i></button>`}
+    </td>`;
+
+        newRow.innerHTML = cellsHtml + actionsHtml;
+        updateNoDataRow(table.parentElement);
+    }
+
+    function updateNoDataRow(table) {
+        const tbody = table.querySelector('tbody');
+        let noDataRow = tbody.querySelector('.no-data-row');
+        const dataRows = tbody.querySelectorAll('tr:not(.no-data-row)');
+        const colCount = table.querySelector('thead th').length;
+        if (dataRows.length === 0) {
+            if (!noDataRow) tbody.innerHTML = `<tr class="no-data-row"><td colspan="${colCount}">暂无记录</td></tr>`;
+        } else if (noDataRow) {
+            noDataRow.remove();
+        }
+    }
+
+    function getBadgeClass(status) {
+        if (status === '通过') return 'badge-success';
+        if (status === '待进行') return 'badge-warning';
+        return 'badge-danger'; // For '未通过' or other statuses
+    }
+
+    // --- MODAL LOGIC ---
+    const modal = document.getElementById('genericModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalBody = document.getElementById('modalBody');
+
+    function closeModal() {
+        modal.style.display = 'none';
+        currentAction = '';
+        currentEditTarget = null;
+    }
+    window.onclick = (event) => { if (event.target == modal) closeModal(); };
+
+    function showModal(actionType, data = {}, target = null) {
+        currentAction = actionType;
+        currentEditTarget = target;
+        let title = '', formHtml = '';
+
+        switch (actionType) {
+            // --- STATIC SECTION FORMS ---
+            case 'editBasicInfo':
+                title = '编辑基本信息';
+                formHtml = `<div class="form-grid">
+                <div class="form-group"><label>姓名</label><input id="form-name" value="${document.getElementById('info-name').innerText}"></div>
+                <div class="form-group"><label>年级</label><input id="form-grade" value="${document.getElementById('info-grade').innerText}"></div>
+                <div class="form-group"><label>学院</label><input id="form-college" value="${document.getElementById('info-college').innerText}"></div>
+                <div class="form-group"><label>专业</label><input id="form-major" value="${document.getElementById('info-major').innerText}"></div>
+            </div>`;
+                break;
+            case 'editCourseInfo':
+                title = '编辑均绩';
+                formHtml = `<div class="form-group"><label>平均学分绩</label><input type="number" step="0.1" id="form-gpa" value="${document.getElementById('info-gpa').innerText}"></div>`;
+                break;
+
+            // --- DYNAMIC TABLE FORMS ---
+            case 'addPractice': case 'editPractice':
+                title = actionType === 'addPractice' ? '添加实践条目' : '编辑实践条目';
+                formHtml = `<div class="form-group"><label>项目名称</label><input id="form_name" value="${data.name || ''}"></div>
+                        <div class="form-group"><label>完成情况</label><textarea id="form_notes" rows="3">${data.notes || ''}</textarea></div>`;
+                break;
+            case 'addTrainingStep': case 'editTrainingStep':
+                title = actionType === 'addTrainingStep' ? '添加培养环节' : '编辑培养环节';
+                const status = data.status || '待进行';
+                const date = data.date === '-' ? '' : data.date;
+                formHtml = `<div class="form-group"><label>环节名称</label><input id="form_name" value="${data.name || ''}"></div>
+                        <div class="form-grid">
+                            <div class="form-group"><label>状态</label><select id="form_status"><option value="通过" ${status === '通过' ? 'selected':''}>通过</option><option value="待进行" ${status === '待进行' ? 'selected':''}>待进行</option><option value="未通过" ${status === '未通过' ? 'selected':''}>未通过</option></select></div>
+                            <div class="form-group"><label>完成日期</label><input type="date" id="form_date" value="${date || ''}"></div>
+                        </div>`;
+                break;
+            case 'addAchievement': case 'editAchievement':
+                title = actionType === 'addAchievement' ? '添加成果' : '编辑成果';
+                formHtml = `<div class="form-grid"><div class="form-group"><label>类型</label><input id="form_type" value="${data.type || ''}"></div><div class="form-group"><label>发表/授权日期</label><input type="date" id="form_date" value="${data.date || ''}"></div></div>
+                        <div class="form-group"><label>成果名称</label><input id="form_name" value="${data.name || ''}"></div>
+                        <div class="form-group"><label>备注</label><input id="form_notes" value="${data.notes || ''}"></div>`;
+                break;
+            case 'addCompetition': case 'editCompetition':
+                title = actionType === 'addCompetition' ? '添加竞赛' : '编辑竞赛';
+                formHtml = `<div class="form-group"><label>竞赛名称</label><input id="form_name" value="${data.name || ''}"></div>
+                        <div class="form-grid"><div class="form-group"><label>级别</label><input id="form_level" value="${data.level || ''}"></div><div class="form-group"><label>获奖等级</label><input id="form_award" value="${data.award || ''}"></div><div class="form-group"><label>获奖年份</label><input type="number" id="form_year" value="${data.year || ''}"></div></div>`;
+                break;
+            case 'addDiscipline': case 'editDiscipline':
+                title = actionType === 'addDiscipline' ? '补充处分' : '编辑处分';
+                formHtml = `<div class="form-grid"><div class="form-group"><label>处分类型</label><input id="form_type" value="${data.type || ''}"></div><div class="form-group"><label>日期</label><input type="date" id="form_date" value="${data.date || ''}"></div></div>
+                        <div class="form-group"><label>事由</label><textarea id="form_reason" rows="3">${data.reason || ''}</textarea></div>`;
+                break;
+        }
+        modalTitle.innerHTML = title;
+        modalBody.innerHTML = formHtml;
+        modal.style.display = 'block';
+    }
+
+    function saveData() {
+        let isValid = true;
+        switch(currentAction) {
+            case 'editBasicInfo':
+                const name = document.getElementById('form-name').value;
+                document.getElementById('info-name').innerText = name;
+                document.getElementById('student-name').innerText = name;
+                const college = document.getElementById('form-college').value;
+                document.getElementById('info-college').innerText = college;
+                document.getElementById('student-college').innerText = college;
+                document.getElementById('info-grade').innerText = document.getElementById('form-grade').value;
+                document.getElementById('info-major').innerText = document.getElementById('form-major').value;
+                break;
+            case 'editCourseInfo':
+                document.getElementById('info-gpa').innerText = document.getElementById('form-gpa').value;
+                break;
+            case 'addPractice': case 'editPractice':
+                const practiceData = { name: document.getElementById('form_name').value, notes: document.getElementById('form_notes').value };
+                if (!practiceData.name) isValid = false;
+                if (isValid) {
+                    if (currentAction === 'addPractice') addTableRow('practiceTable', practiceData, 'Practice');
+                    else { currentEditTarget.cells[0].innerText = practiceData.name; currentEditTarget.cells[1].innerText = practiceData.notes; Object.assign(currentEditTarget.dataset, practiceData); }
+                }
+                break;
+            case 'addTrainingStep': case 'editTrainingStep':
+                const trainingData = { name: document.getElementById('form_name').value, status: document.getElementById('form_status').value, date: document.getElementById('form_date').value };
+                if (!trainingData.name) isValid = false;
+                if (isValid) {
+                    if (currentAction === 'addTrainingStep') addTableRow('trainingTable', trainingData, 'TrainingStep');
+                    else {
+                        currentEditTarget.cells[0].innerText = trainingData.name;
+                        currentEditTarget.cells[1].innerHTML = `<span class="badge ${getBadgeClass(trainingData.status)}">${trainingData.status}</span>`;
+                        currentEditTarget.cells[2].innerText = trainingData.date || '-';
+                        Object.assign(currentEditTarget.dataset, trainingData);
+                    }
+                }
+                break;
+            case 'addAchievement': case 'editAchievement':
+                const achData = { type: document.getElementById('form_type').value, name: document.getElementById('form_name').value, date: document.getElementById('form_date').value, notes: document.getElementById('form_notes').value };
+                if (!achData.type || !achData.name) isValid = false;
+                if(isValid) {
+                    if (currentAction === 'addAchievement') addTableRow('achievementsTable', achData, 'Achievement');
+                    else { currentEditTarget.cells[0].innerText = achData.type; currentEditTarget.cells[1].innerText = achData.name; currentEditTarget.cells[2].innerText = achData.date; currentEditTarget.cells[3].innerText = achData.notes; Object.assign(currentEditTarget.dataset, achData); }
+                }
+                break;
+            case 'addCompetition': case 'editCompetition':
+                const compData = { name: document.getElementById('form_name').value, level: document.getElementById('form_level').value, award: document.getElementById('form_award').value, year: document.getElementById('form_year').value };
+                if (!compData.name) isValid = false;
+                if(isValid) {
+                    if (currentAction === 'addCompetition') addTableRow('competitionsTable', compData, 'Competition');
+                    else { currentEditTarget.cells[0].innerText = compData.name; currentEditTarget.cells[1].innerText = compData.level; currentEditTarget.cells[2].innerText = compData.award; currentEditTarget.cells[3].innerText = compData.year; Object.assign(currentEditTarget.dataset, compData); }
+                }
+                break;
+            case 'addDiscipline': case 'editDiscipline':
+                const disData = { type: document.getElementById('form_type').value, reason: document.getElementById('form_reason').value, date: document.getElementById('form_date').value };
+                if (!disData.type || !disData.reason) isValid = false;
+                if(isValid) {
+                    if (currentAction === 'addDiscipline') addTableRow('disciplineTable', disData, 'Discipline');
+                    else { currentEditTarget.cells[0].innerText = disData.type; currentEditTarget.cells[1].innerText = disData.reason; currentEditTarget.cells[2].innerText = disData.date; Object.assign(currentEditTarget.dataset, disData); }
+                }
+                break;
+        }
+
+        if (isValid) { alert('信息已保存！'); closeModal(); }
+        else { alert('请填写所有必填项！'); }
+    }
+
+    // --- INITIALIZE ---
+    document.addEventListener('DOMContentLoaded', initializePage);
+</script>
+</body>
+</html>
