@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生信息管理 | 研究生管理系统</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --dark-color: #2c3e50;
+            --light-color: #ecf0f1;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            grid-template-rows: 60px 1fr;
+            height: 100vh;
+        }
+
+        header {
+            grid-column: 1 / 3;
+            background-color: var(--dark-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-icon {
+            margin-right: 10px;
+            font-size: 24px;
+        }
+
+        .user-info {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 15px;
+            font-weight: 500;
+        }
+
+        .sidebar {
+            background-color: white;
+            border-right: 1px solid #e0e0e0;
+            padding: 20px 0;
+        }
+
+        .menu {
+            list-style: none;
+        }
+
+        .menu-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .menu-item:hover {
+            background-color: #f5f7fa;
+        }
+
+        .menu-item.active {
+            background-color: var(--light-color);
+            border-left: 3px solid var(--primary-color);
+            font-weight: 500;
+        }
+
+        .menu-icon {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+
+        .main-content {
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .page-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: var(--dark-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .student-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .student-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: var(--light-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: var(--primary-color);
+            margin-right: 20px;
+            font-weight: 500;
+        }
+
+        .student-details {
+            flex: 1;
+        }
+
+        .student-name {
+            font-size: 24px;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .student-id {
+            color: #7f8c8d;
+            font-size: 16px;
+        }
+
+        .student-meta {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #7f8c8d;
+            display: flex;
+            gap: 20px;
+        }
+
+        .module-section {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: var(--dark-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .section-title-icon {
+            margin-right: 10px;
+            color: var(--primary-color);
+        }
+
+        .section-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .table-container {
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+            vertical-align: middle;
+        }
+
+        th {
+            background-color: var(--light-color);
+            font-weight: 500;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background-color: #f5f7fa;
+        }
+
+        .actions-cell {
+            width: 150px;
+            text-align: right;
+        }
+
+        .actions-cell .btn {
+            margin-left: 5px;
+        }
+
+        .btn {
+            padding: 8px 15px;
+            border-radius: 4px;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-secondary {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #7f8c8d;
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 13px;
+        }
+
+        .btn-icon {
+            margin-right: 5px;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+<div class="container">
+    <!-- Navigation and Sidebar -->
+    <header>
+        <div class="logo"><span class="logo-icon"><i class="fas fa-graduation-cap"></i></span><span>研究生管理系统</span></div>
+        <div class="user-info"><span>管理员</span><div class="user-avatar">管</div></div>
+    </header>
+    <aside class="sidebar">
+        <ul class="menu">
+            <li class="menu-item"><span class="menu-icon"><i class="fas fa-tachometer-alt"></i></span><span>数据展板</span></li>
+            <li class="menu-item"><span class="menu-icon"><i class="fas fa-chalkboard-teacher"></i></span><span>导师信息</span></li>
+            <li class="menu-item active"><span class="menu-icon"><i class="fas fa-user-graduate"></i></span><span>学生信息</span></li>
+            <li class="menu-item"><span class="menu-icon"><i class="fas fa-star"></i></span><span>评价系统</span></li>
+            <li class="menu-item"><span class="menu-icon"><i class="fas fa-cog"></i></span><span>系统设置</span></li>
+        </ul>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <div class="page-title"><h1>学术型硕士研究生 - 评价详情</h1></div>
+
+        <!-- Student Header -->
+        <div class="student-header">
+            <div class="student-avatar">李</div>
+            <div class="student-details">
+                <div class="student-name">李明</div>
+                <div class="student-id">2021012345</div>
+                <div class="student-meta">
+                    <span><strong>院系:</strong> 水产学院</span>
+                    <span><strong>专业:</strong> 水产养殖</span>
+                    <span><strong>年级:</strong> 2021级</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 课程体系完成 & 实践模块 -->
+        <div class="module-section">
+            <div class="section-title">
+                <span><i class="fas fa-book-open section-title-icon"></i>课程与实践</span>
+                <div class="section-actions">
+                    <button class="btn btn-primary btn-sm"><i class="fas fa-edit btn-icon"></i>更新成绩/状态</button>
+                </div>
+            </div>
+            <table>
+                <thead>
+                <tr>
+                    <th>分类</th>
+                    <th>细类/模块</th>
+                    <th>状态/平均分</th>
+                    <th>分值</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td rowspan="4" style="vertical-align: middle;">课程体系</td>
+                    <td>公共课</td>
+                    <td>88.5</td>
+                    <td>1</td>
+                </tr>
+                <tr>
+                    <td>基础课</td>
+                    <td>91.2</td>
+                    <td>2</td>
+                </tr>
+                <tr>
+                    <td>核心专业课</td>
+                    <td>85.0</td>
+                    <td>1</td>
+                </tr>
+                <tr>
+                    <td>专业课</td>
+                    <td>76.7</td>
+                    <td>0.5</td>
+                </tr>
+                <tr>
+                    <td rowspan="2" style="vertical-align: middle;">实践模块</td>
+                    <td>学术活动</td>
+                    <td>通过</td>
+                    <td>2</td>
+                </tr>
+                <tr>
+                    <td>实践训练</td>
+                    <td>通过</td>
+                    <td>2</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 培养过程 -->
+        <div class="module-section">
+            <div class="section-title">
+                <span><i class="fas fa-tasks section-title-icon"></i>培养过程</span>
+                <div class="section-actions">
+                    <button class="btn btn-primary btn-sm"><i class="fas fa-edit btn-icon"></i>更新状态</button>
+                </div>
+            </div>
+            <table>
+                <thead>
+                <tr>
+                    <th>环节</th>
+                    <th>状态</th>
+                    <th>分值</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>开题报告 (硕士)</td>
+                    <td>通过</td>
+                    <td>2</td>
+                </tr>
+                <tr>
+                    <td>论文研究进展报告</td>
+                    <td>通过</td>
+                    <td>2</td>
+                </tr>
+                <tr>
+                    <td>院内审核评阅</td>
+                    <td>同意送审</td>
+                    <td>2</td>
+                </tr>
+                <tr>
+                    <td>学位论文答辩</td>
+                    <td>通过</td>
+                    <td>5</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 所获成果 -->
+        <div class="module-section">
+            <div class="section-title">
+                <span><i class="fas fa-atom section-title-icon"></i>所获成果</span>
+                <div class="section-actions">
+                    <button class="btn btn-primary btn-sm"><i class="fas fa-plus btn-icon"></i>添加成果</button>
+                </div>
+            </div>
+            <table>
+                <thead>
+                <tr>
+                    <th>类型</th>
+                    <th>名称/题目</th>
+                    <th>详情</th>
+                    <th>日期</th>
+                    <th>分值</th>
+                    <th class="actions-cell">操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>顶尖期刊SCI论文</td>
+                    <td>关于XX斑马鱼基因的研究</td>
+                    <td>本人排名: 2 (导师一作)</td>
+                    <td>2023-05</td>
+                    <td>10</td>
+                    <td class="actions-cell">
+                        <button class="btn btn-secondary btn-sm"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>国家发明专利</td>
+                    <td>一种新型水质净化装置</td>
+                    <td>本人排名: 1</td>
+                    <td>2024-01</td>
+                    <td>5</td>
+                    <td class="actions-cell">
+                        <button class="btn btn-secondary btn-sm"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>国际会议口头汇报</td>
+                    <td>世界水产养殖大会</td>
+                    <td>-</td>
+                    <td>2023-08</td>
+                    <td>2</td>
+                    <td class="actions-cell">
+                        <button class="btn btn-secondary btn-sm"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 科技活动及竞赛 -->
+        <div class="module-section">
+            <div class="section-title">
+                <span><i class="fas fa-trophy section-title-icon"></i>科技活动及竞赛</span>
+                <div class="section-actions">
+                    <button class="btn btn-primary btn-sm"><i class="fas fa-plus btn-icon"></i>添加奖项</button>
+                </div>
+            </div>
+            <table>
+                <thead>
+                <tr>
+                    <th>奖项名称</th>
+                    <th>级别</th>
+                    <th>等级/名次</th>
+                    <th>日期</th>
+                    <th>分值</th>
+                    <th class="actions-cell">操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>全国研究生创新实践大赛</td>
+                    <td>国家级</td>
+                    <td>二等奖 (权重 0.9)</td>
+                    <td>2023-11</td>
+                    <td>4.5</td>
+                    <td class="actions-cell">
+                        <button class="btn btn-secondary btn-sm"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 奖励与荣誉 -->
+        <div class="module-section">
+            <div class="section-title">
+                <span><i class="fas fa-award section-title-icon"></i>奖励与荣誉</span>
+                <div class="section-actions">
+                    <button class="btn btn-primary btn-sm"><i class="fas fa-plus btn-icon"></i>添加记录</button>
+                </div>
+            </div>
+            <table>
+                <thead>
+                <tr>
+                    <th>类型</th>
+                    <th>名称</th>
+                    <th>级别</th>
+                    <th>日期</th>
+                    <th>分值</th>
+                    <th class="actions-cell">操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>奖学金</td>
+                    <td>研究生国家奖学金</td>
+                    <td>国家级</td>
+                    <td>2023-10</td>
+                    <td>5</td>
+                    <td class="actions-cell">
+                        <button class="btn btn-secondary btn-sm"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>个人荣誉</td>
+                    <td>省级三好学生</td>
+                    <td>省级</td>
+                    <td>2024-03</td>
+                    <td>3</td>
+                    <td class="actions-cell">
+                        <button class="btn btn-secondary btn-sm"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 获批项目 -->
+        <div class="module-section">
+            <div class="section-title">
+                <span><i class="fas fa-project-diagram section-title-icon"></i>获批项目</span>
+                <div class="section-actions">
+                    <button class="btn btn-primary btn-sm"><i class="fas fa-plus btn-icon"></i>添加项目</button>
+                </div>
+            </div>
+            <table>
+                <thead>
+                <tr>
+                    <th>项目名称</th>
+                    <th>类型</th>
+                    <th>状态</th>
+                    <th>日期</th>
+                    <th>分值</th>
+                    <th class="actions-cell">操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>研究生自主科研项目</td>
+                    <td>校级</td>
+                    <td>已立项 / 未结题</td>
+                    <td>2022-09</td>
+                    <td>2</td>
+                    <td class="actions-cell">
+                        <button class="btn btn-secondary btn-sm"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 处分或惩罚 -->
+        <div class="module-section">
+            <div class="section-title">
+                <span><i class="fas fa-exclamation-triangle section-title-icon" style="color:var(--danger-color)"></i>处分或惩罚</span>
+                <div class="section-actions">
+                    <button class="btn btn-primary btn-sm"><i class="fas fa-plus btn-icon"></i>添加记录</button>
+                </div>
+            </div>
+            <table>
+                <thead>
+                <tr>
+                    <th>处分类型</th>
+                    <th>日期</th>
+                    <th>分值</th>
+                    <th class="actions-cell">操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>校级警示</td>
+                    <td>2022-04</td>
+                    <td>-1</td>
+                    <td class="actions-cell">
+                        <button class="btn btn-secondary btn-sm"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </main>
+
+</div>
+</body>
+</html>
