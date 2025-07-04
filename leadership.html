@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>导师信息管理 | 研究生管理系统</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --dark-color: #2c3e50;
+            --light-color: #ecf0f1;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            grid-template-rows: 60px 1fr;
+            height: 100vh;
+        }
+
+        /* 导航栏样式 */
+        header {
+            grid-column: 1 / 3;
+            background-color: var(--dark-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-icon {
+            margin-right: 10px;
+            font-size: 24px;
+        }
+
+        .user-info {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 15px;
+            font-weight: 500;
+        }
+
+        /* 侧边栏样式 */
+        .sidebar {
+            background-color: white;
+            border-right: 1px solid #e0e0e0;
+            padding: 20px 0;
+        }
+
+        .menu {
+            list-style: none;
+        }
+
+        .menu-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .menu-item:hover {
+            background-color: #f5f7fa;
+        }
+
+        .menu-item.active {
+            background-color: var(--light-color);
+            border-left: 3px solid var(--primary-color);
+            font-weight: 500;
+        }
+
+        .menu-icon {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+
+        /* 内容区样式 */
+        .main-content {
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .page-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: var(--dark-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* 导师基本信息样式 */
+        .supervisor-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .supervisor-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: var(--light-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: var(--primary-color);
+            margin-right: 20px;
+            font-weight: 500;
+        }
+
+        .supervisor-info {
+            flex: 1;
+        }
+
+        .supervisor-name {
+            font-size: 24px;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .supervisor-id {
+            color: #7f8c8d;
+            font-size: 16px;
+        }
+
+        .supervisor-meta {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #7f8c8d;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 10px;
+        }
+
+        /* 模块区域样式 */
+        .module-section {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: var(--dark-color);
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .section-title-icon {
+            margin-right: 10px;
+            color: var(--primary-color);
+        }
+
+        .section-subtitle {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--dark-color);
+            margin-top: 25px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* 表格样式 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background-color: var(--light-color);
+            font-weight: 500;
+        }
+
+        tr:hover {
+            background-color: #f5f7fa;
+        }
+
+        .actions-cell {
+            width: 200px;
+            text-align: right;
+        }
+
+        .actions-cell .btn {
+            margin-left: 5px;
+        }
+
+        .course-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .course-item {
+            background-color: var(--light-color);
+            border-radius: 6px;
+            padding: 15px;
+            position: relative;
+        }
+
+        .course-name { font-weight: 500; margin-bottom: 5px; }
+        .course-meta { font-size: 14px; color: #7f8c8d; margin-bottom: 5px; }
+        .course-evaluation { display: flex; margin-top: 10px; }
+        .evaluation-item { flex: 1; text-align: center; font-size: 14px; }
+        .evaluation-value { font-weight: 500; color: var(--primary-color); }
+
+        /* 表单样式 */
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: 500; }
+        input, select, textarea { width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 4px; font-family: inherit; }
+
+        /* 按钮样式 */
+        .btn { padding: 8px 15px; border-radius: 4px; border: none; font-weight: 500; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; justify-content: center; }
+        .btn-primary { background-color: var(--primary-color); color: white; }
+        .btn-primary:hover { background-color: #2980b9; }
+        .btn-danger { background-color: var(--danger-color); color: white; }
+        .btn-danger:hover { background-color: #c0392b; }
+        .btn-secondary { background-color: #95a5a6; color: white; }
+        .btn-secondary:hover { background-color: #7f8c8d; }
+        .btn-sm { padding: 5px 10px; font-size: 13px; }
+        .btn-icon { margin-right: 5px; }
+
+        /* 标签样式 */
+        .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; margin-right: 5px; }
+        .badge-primary { background-color: var(--light-color); color: var(--primary-color); }
+        .badge-success { background-color: #d5f5e3; color: #27ae60; }
+        .badge-warning { background-color: #fef9e7; color: #f39c12; }
+
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px; /* Adjusted default width */
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            animation: slide-down 0.3s ease-out;
+        }
+
+        .modal-content-lg { max-width: 800px; }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e9ecef;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .modal-title { font-size: 20px; color: var(--dark-color); }
+
+        .close-button { background: none; border: none; font-size: 24px; cursor: pointer; color: #aaa; }
+
+        .modal-footer {
+            text-align: right;
+            margin-top: 20px;
+            border-top: 1px solid #e9ecef;
+            padding-top: 15px;
+        }
+        .search-results { border: 1px solid #ddd; border-radius: 4px; padding: 10px; min-height: 100px; margin-top: 10px; }
+        .search-results p { color: #888; text-align: center; margin-top: 20px; }
+
+        @keyframes slide-down { from { transform: translateY(-30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+<div class="container">
+    <header>
+        <div class="logo"><span class="logo-icon"><i class="fas fa-graduation-cap"></i></span><span>研究生管理系统</span></div>
+        <div class="user-info"><span>管理员</span><div class="user-avatar">管</div></div>
+    </header>
+
+    <aside class="sidebar">
+        <ul class="menu">
+            <li class="menu-item"><span class="menu-icon"><i class="fas fa-tachometer-alt"></i></span><span>数据展板</span></li>
+            <li class="menu-item active"><span class="menu-icon"><i class="fas fa-chalkboard-teacher"></i></span><span>导师信息</span></li>
+            <li class="menu-item"><span class="menu-icon"><i class="fas fa-user-graduate"></i></span><span>学生信息</span></li>
+            <li class="menu-item"><span class="menu-icon"><i class="fas fa-star"></i></span><span>评价系统</span></li>
+            <li class="menu-item"><span class="menu-icon"><i class="fas fa-cog"></i></span><span>系统设置</span></li>
+        </ul>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-title">
+            <h1>导师信息管理</h1>
+            <button class="btn btn-secondary" onclick="goBack()"><i class="fas fa-arrow-left btn-icon"></i>返回列表</button>
+        </div>
+
+        <div class="supervisor-header">
+            <div class="supervisor-avatar">刘</div>
+            <div class="supervisor-info">
+                <h2 class="supervisor-name">刘教授</h2>
+                <div class="supervisor-id">工号: 990187</div>
+                <div class="supervisor-meta">
+                    <span><strong>院系:</strong> 水产学院</span>
+                    <span><strong>职称:</strong> 教授 / 博导</span>
+                    <span><strong>研究方向:</strong> 海洋生物技术, 渔业资源学</span>
+                    <span><strong>指导学生总数:</strong> 5</span>
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="showModal('edit-supervisor')"><i class="fas fa-edit btn-icon"></i>编辑信息</button>
+        </div>
+
+        <section class="module-section">
+            <h2 class="section-title"><i class="fas fa-users section-title-icon"></i>学生培养</h2>
+
+            <div class="section-subtitle">
+                <span>指导学生列表</span>
+                <button class="btn btn-primary btn-sm" onclick="openLinkStudentModal()"><i class="fas fa-plus btn-icon"></i>关联新学生</button>
+            </div>
+            <table>
+                <thead>
+                <tr>
+                    <th>学号</th>
+                    <th>姓名</th>
+                    <th>学生类别</th>
+                    <th>年级</th>
+                    <th>状态</th>
+                    <th class="actions-cell">操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>2021012345</td>
+                    <td>李明</td>
+                    <td>学术型硕士</td>
+                    <td>2021级</td>
+                    <td>在读</td>
+                    <td class="actions-cell">
+                        <button class="btn btn-sm btn-secondary" style="background-color: #bdc3c7; color: #2c3e50;"><i class="fas fa-eye btn-icon"></i>查看详情</button>
+                        <button class="btn btn-sm btn-danger"><i class="fas fa-unlink"></i></button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>2022专硕050</td>
+                    <td>张三</td>
+                    <td>专业型硕士</td>
+                    <td>2022级</td>
+                    <td>在读</td>
+                    <td class="actions-cell">
+                        <button class="btn btn-sm btn-secondary" style="background-color: #bdc3c7; color: #2c3e50;"><i class="fas fa-eye btn-icon"></i>查看详情</button>
+                        <button class="btn btn-sm btn-danger"><i class="fas fa-unlink"></i></button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>2020博士001</td>
+                    <td>王伟</td>
+                    <td>学术型博士</td>
+                    <td>2020级</td>
+                    <td>已毕业</td>
+                    <td class="actions-cell">
+                        <button class="btn btn-sm btn-secondary" style="background-color: #bdc3c7; color: #2c3e50;"><i class="fas fa-eye btn-icon"></i>查看详情</button>
+                        <button class="btn btn-sm btn-danger"><i class="fas fa-unlink"></i></button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+            <div class="section-subtitle">研究生招生情况</div>
+            <table>
+                <thead>
+                <tr><th>类型</th><th>2023</th><th>2022</th><th>2021</th><th>2020</th></tr>
+                </thead>
+                <tbody>
+                <tr><td>博士生</td><td>3</td><td>2</td><td>2</td><td>1</td></tr>
+                <tr><td>硕士生</td><td>5</td><td>4</td><td>3</td><td>3</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="module-section">
+            <h2 class="section-title"><i class="fas fa-book section-title-icon"></i>课程与教材</h2>
+            <div class="section-subtitle">讲授课程</div>
+            <div class="course-list">
+                <div class="course-item">
+                    <h3 class="course-name">海洋生物技术</h3>
+                    <div class="course-meta"><span class="badge badge-primary">专业课程</span> 周三 5-7节</div>
+                    <div class="course-evaluation"><div class="evaluation-item"><div class="evaluation-value">4.8/5.0</div><div>学生评价</div></div></div>
+                </div>
+                <div class="course-item">
+                    <h3 class="course-name">渔业资源评估</h3>
+                    <div class="course-meta"><span class="badge badge-primary">专业课程</span> 周五 1-3节</div>
+                    <div class="course-evaluation"><div class="evaluation-item"><div class="evaluation-value">4.7/5.0</div><div>学生评价</div></div></div>
+                </div>
+            </div>
+
+            <div class="section-subtitle">出版研究生教材</div>
+            <table>
+                <thead>
+                <tr><th>教材名称</th><th>出版社</th><th>担任职务</th><th>出版年份</th><th>操作</th></tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>现代渔业科学导论</td>
+                    <td>海洋出版社</td>
+                    <td><span class="badge badge-warning">主编</span></td>
+                    <td>2021</td>
+                    <td>
+                        <button class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+
+    </main>
+</div>
+
+<!-- Modal for editing/adding general info -->
+<div id="generic-modal" class="modal">
+    <div id="generic-modal-content" class="modal-content modal-content-lg">
+        <div class="modal-header">
+            <h3 id="modal-title" class="modal-title">编辑信息</h3>
+            <button onclick="closeGenericModal()" class="close-button">×</button>
+        </div>
+        <div id="modal-body"></div>
+        <div class="modal-footer">
+            <button onclick="closeGenericModal()" class="btn btn-secondary" style="margin-right: 10px;">取消</button>
+            <button type="button" class="btn btn-primary">保存</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for linking a new student -->
+<div id="linkStudentModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">关联新学生</h2>
+            <span class="close-button" onclick="closeLinkStudentModal()">×</span>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="student-search">搜索学生 (学号或姓名)</label>
+                <input type="text" id="student-search" placeholder="请输入关键词进行搜索...">
+            </div>
+            <div class="search-results"><p>暂无搜索结果</p></div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeLinkStudentModal()">取消</button>
+            <button class="btn btn-primary">确认关联</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Generic Modal Functions
+    function showModal(modalType) {
+        const modal = document.getElementById('generic-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalBody = document.getElementById('modal-body');
+
+        // Reset content
+        modalBody.innerHTML = '';
+
+        switch(modalType) {
+            case 'edit-supervisor':
+                modalTitle.textContent = '编辑导师信息';
+                modalBody.innerHTML = `
+                    <div class="form-group"><label for="name">导师姓名</label><input type="text" id="name" value="刘教授"></div>
+                    <div class="form-group"><label for="id">工号</label><input type="text" id="id" value="990187"></div>
+                    <div class="form-group"><label for="title">职称</label><input type="text" id="title" value="教授 / 博导"></div>
+                    <div class="form-group"><label for="department">所属院系</label><input type="text" id="department" value="水产学院"></div>
+                    <div class="form-group"><label for="research-field">研究方向</label><input type="text" id="research-field" value="海洋生物技术, 渔业资源学"></div>
+                `;
+                break;
+            // ... other cases from base code can be added here
+            default:
+                modalTitle.textContent = '功能详情';
+                modalBody.innerHTML = `<p>正在开发中，敬请期待...</p>`;
+        }
+        modal.style.display = 'block';
+    }
+
+    function closeGenericModal() {
+        document.getElementById('generic-modal').style.display = 'none';
+    }
+
+    // Link Student Modal Functions
+    function openLinkStudentModal() {
+        document.getElementById('linkStudentModal').style.display = 'block';
+    }
+
+    function closeLinkStudentModal() {
+        document.getElementById('linkStudentModal').style.display = 'none';
+    }
+
+    // General Utility Functions
+    function goBack() {
+        // In a real app, this would go to the supervisor list page
+        alert('返回导师列表...');
+    }
+
+    // Close modals if user clicks outside of them
+    window.onclick = function(event) {
+        const genericModal = document.getElementById('generic-modal');
+        const linkModal = document.getElementById('linkStudentModal');
+        if (event.target == genericModal) {
+            closeGenericModal();
+        }
+        if (event.target == linkModal) {
+            closeLinkStudentModal();
+        }
+    }
+</script>
+</body>
+</html>
